@@ -7,6 +7,7 @@ import (
     "github.com/nanobox-io/golang-scribble"
     "github.com/gorilla/mux"
     "encoding/json"
+    "html/template"
 )
 
 type Location struct {
@@ -54,7 +55,10 @@ func MarauderMap(w http.ResponseWriter, r *http.Request) {
     json.Unmarshal([]byte(wizard), &l)
    aLotOfWizards = append(aLotOfWizards, l)
  }
- fmt.Fprintln(w, aLotOfWizards)
+  t := template.Must(template.ParseFiles("templates/map.html"))  //This line should have some problem
+
+  t.Execute(w, aLotOfWizards)
+// fmt.Fprintln(w, aLotOfWizards)
 }
 
 func updateLocation(location Location) {

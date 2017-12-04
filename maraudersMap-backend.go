@@ -8,14 +8,19 @@ import (
     "github.com/gorilla/mux"
     "encoding/json"
     "html/template"
+    "os"
 )
 
+var region_name = map[string]string {
+  "11A29583-9A74-4EDC-91B3-0A06A45DC539": "Syltherin common room",
+}
 type Location struct {
   Name string
   Uuid string
-  Location string
-  Distance string
+  Accuracy float32
+  RegionName string
 }
+
 var db *scribble.Driver
 
 func welcomeHandler(w http.ResponseWriter, r *http.Request){
@@ -43,7 +48,16 @@ func UpdateLocation(w http.ResponseWriter, r *http.Request){
     panic(err)
     }
   fmt.Println("printig out decode stuff: ", location.Name)
-  updateLocation(location)
+  location.RegionName = region_name[location.Uuid]
+  if _, err := os.Stat("marauderMap/" + location.Name + ".json"); os.IsNotExist(err) {
+    updateLocation(location)
+  } else {
+    current := Location{}
+    db.Read("MarauderMap", location.Name, current)
+    if (current.Accuracy < location.Accuracy) {
+      updateLocation(location)
+    }
+  }
   fmt.Fprintln(w,location.Uuid)
 }
 

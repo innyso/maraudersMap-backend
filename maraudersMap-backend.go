@@ -10,9 +10,6 @@ import (
     "os"
 )
 
-var region_name = map[string]string {
-  "11A29583-9A74-4EDC-91B3-0A06A45DC539": "Syltherin common room",
-}
 type Location struct {
   Name string `json:"Name"`
   Uuid string `json:"Uuid"`
@@ -47,7 +44,6 @@ func UpdateLocation(w http.ResponseWriter, r *http.Request){
     panic(err)
     }
   fmt.Println("printig out decode stuff: ", location.Name)
-  location.RegionName = region_name[location.Uuid]
   if _, err := os.Stat("marauderMap/" + location.Name + ".json"); os.IsNotExist(err) {
     updateLocation(location)
   } else {

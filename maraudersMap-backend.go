@@ -7,7 +7,6 @@ import (
     "github.com/nanobox-io/golang-scribble"
     "github.com/gorilla/mux"
     "encoding/json"
-    "html/template"
     "os"
 )
 
@@ -15,10 +14,10 @@ var region_name = map[string]string {
   "11A29583-9A74-4EDC-91B3-0A06A45DC539": "Syltherin common room",
 }
 type Location struct {
-  Name string
-  Uuid string
-  Accuracy float32
-  RegionName string
+  Name string `json:"Name"`
+  Uuid string `json:"Uuid"`
+  Accuracy float32 `json:"Accuracy"`
+  RegionName string `json:"RegionName"`
 }
 
 var db *scribble.Driver
@@ -64,15 +63,20 @@ func UpdateLocation(w http.ResponseWriter, r *http.Request){
 func MarauderMap(w http.ResponseWriter, r *http.Request) {
   aLotOfWizards := []Location{}
   wizards, _ := db.ReadAll("MarauderMap")
+
   for _, wizard := range wizards {
     l := Location{}
     json.Unmarshal([]byte(wizard), &l)
    aLotOfWizards = append(aLotOfWizards, l)
- }
-  t := template.Must(template.ParseFiles("templates/map.html"))  //This line should have some problem
+  }
 
-  t.Execute(w, aLotOfWizards)
-// fmt.Fprintln(w, aLotOfWizards)
+  js, err := json.Marshal(aLotOfWizards)
+  if err != nil {
+    http.Error(w, err.Error(), http.StatusInternalServerError)
+    return
+  }
+  w.Header().Set("Content-Type", "application/json")
+  w.Write(js);
 }
 
 func updateLocation(location Location) {

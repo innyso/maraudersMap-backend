@@ -42,16 +42,21 @@ func UpdateLocation(w http.ResponseWriter, r *http.Request){
   defer r.Body.Close()
   if err != nil {
     panic(err)
-    }
-  fmt.Println("printig out decode stuff: ", location.Name)
+  }
   if _, err := os.Stat("marauderMap/" + location.Name + ".json"); os.IsNotExist(err) {
     updateLocation(location)
   } else {
     current := Location{}
-    db.Read("MarauderMap", location.Name, current)
-    if (current.Accuracy < location.Accuracy) {
+    db.Read("MarauderMap", location.Name, &current)
+    fmt.Println("Wizard Exist");
+    fmt.Println("Current reading is: ", location.RegionName)
+    fmt.Println("Current accuracy is: ", location.Accuracy)
+    fmt.Println("Accuracy from db is: ", current.Accuracy)
+    if (current.Accuracy > location.Accuracy && location.Accuracy > 0) {
+      fmt.Println("need to update location")
       updateLocation(location)
     }
+    fmt.Println("========================");
   }
   fmt.Fprintln(w,location.Uuid)
 }
@@ -94,7 +99,7 @@ func main() {
   router := mux.NewRouter().StrictSlash(true)
   router.HandleFunc("/", Welcome)
   router.HandleFunc("/newWizard/{name}/", NewWizard)
-  router.HandleFunc("/updateLocation/", UpdateLocation)
+  router.HandleFunc("/updateLocation/", UpdateLocation).Methods("POST")
   router.HandleFunc("/maraudersMap/", MarauderMap)
 
   log.Fatal(http.ListenAndServe(":1234", router))

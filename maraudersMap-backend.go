@@ -52,9 +52,16 @@ func UpdateLocation(w http.ResponseWriter, r *http.Request){
     fmt.Println("Current reading is: ", location.RegionName)
     fmt.Println("Current accuracy is: ", location.Accuracy)
     fmt.Println("Accuracy from db is: ", current.Accuracy)
-    if (current.Accuracy > location.Accuracy && location.Accuracy > 0) {
-      fmt.Println("need to update location")
-      updateLocation(location)
+    if (location.Accuracy > 0) {
+      if (current.RegionName == location.RegionName){
+        fmt.Println("update location: same region but need to keep track of current proximity")
+        updateLocation(location)
+      }else {
+        if (current.Accuracy > location.Accuracy) {
+          fmt.Println("update location: different region and we are closer to new region now")
+          updateLocation(location)
+        }
+      }
     }
     fmt.Println("========================");
   }
